@@ -23,3 +23,6 @@ def sidetrack(v, G, T):
         if h not in T[v]:
             ret.append((v, h))
     return ret
+
+# def outname(v, h, t):
+#     return f"[{v}] ({h},{t})"

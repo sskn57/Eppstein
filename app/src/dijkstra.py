@@ -1,6 +1,5 @@
-"""
-G: networkX Graph
-"""
+import networkx as nx
+
 def bib_method(G, src, dst, weight_label="weight", verbose=False):
     S = {} #srcから探索した頂点集合
     T = {} #dstから探索した頂点集合
@@ -147,6 +146,7 @@ def uni_method(G, src, dst, weight_label="weight", verbose=False):
             tmp = path_s[v[0]].copy()
             tmp.append(v0)
             path_s[v0] = tmp
+            # print(f"{v0} add")
 
     length = ps[dst]
     path = path_s[dst]
@@ -167,3 +167,9 @@ def _min(V, B, potential):
                 m[0] = v_name
                 m[1] = potential[v_name]
     return m[0]
+
+# def pred2path(G, src, dst):
+#     pred, distance = nx.dijkstra_predecessor_and_distance(G.reverse(), source=dst)
+#     # print(pred)
+#     # print(pred[src])
+    

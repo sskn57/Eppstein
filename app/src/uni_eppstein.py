@@ -139,45 +139,91 @@ if __name__ == "__main__":
 
     # Path Graphの作成
     P = nx.DiGraph()
-    # H_Gを追加
+
+    # P(step1): H_GからパスグラフであるヒープPを作成する．
     for v, h_g in H_G.items():
-        # print(v)
         for i, (parent_val, (parent_h, parent_t)) in enumerate(h_g.data):
-            parent_node_name = f"[{v}] ({parent_h},{parent_t})"
-            # print(parent_node_name)
-            P.add_node(parent_node_name)
+            parent_node = (v, (parent_h, parent_t))
+            P.add_node(parent_node)
             if 2*(i+1)-1 < len(h_g.data):
                 (child_val, (child_h, child_t)) = h_g.data[2*(i+1)-1]
-                child_node_name = f"[{v}] ({child_h},{child_t})"
-                # print(child_node_name)
+                child_node = (v, (child_h, child_t))
                 w = G[child_h][child_t]["delta"] - G[parent_h][parent_t]["delta"]
-                # print(w)
-                P.add_edge(parent_node_name, child_node_name, weight=w)
+                P.add_edge(parent_node, child_node, weight=w)
+                P[parent_node][child_node]["color"] = "black"
             if 2*(i+1) < len(h_g.data):
                 (child_val, (child_h, child_t)) = h_g.data[2*(i+1)]
-                child_node_name = f"[{v}] ({child_h},{child_t})"
-                # print(child_node_name)
+                child_node = (v, (child_h, child_t))
                 w = G[child_h][child_t]["delta"] - G[parent_h][parent_t]["delta"]
-                # print(w)
-                # P.add_edge()
-                P.add_edge(parent_node_name, child_node_name, weight=w)
+                P.add_edge(parent_node, child_node, weight=w)
+                P[parent_node][child_node]["color"] = "black"
     
+    # P(step1)描画
+    p_pos = nx.shell_layout(P)
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.set_title(f"H_GtoP({dataset_id})")
-    edge_labels = {(i, j): w['weight'] for i, j, w in P.edges(data=True)}
-    p_pos = nx.spring_layout(P, k=3)
-    nx.draw_networkx_edge_labels(P, p_pos, edge_labels=edge_labels)
+    ax.set_title(f"P(step1)({dataset_id})")
+    edge_color = [v["color"] for v in P.edges.values()]
+    nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
     nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    plt.savefig(os.path.join(data_dir_name, "out", "H_GtoP"+dataset_id))
+    plt.savefig(os.path.join(data_dir_name, "out", "P(step1)"+dataset_id))
     if FIGURE_SHOW:
         plt.show()
 
-    # # cross辺の追加
-    # for e in P.edges():
-    #     print(e)
-    # for e in T.edges():
-    #     print(e)
-        
+    # P(step2): P(step1)の各ノード(v, (h, t))について，そのノードからH_G(t)への辺を追加
+    for p_node in list(P):
+        _, strack = p_node
+        if strack not in T.edges():
+            h, t = strack
+            if len(H_G[t].data) > 0:
+                child = (t, H_G[t].data[0][1])
+                w = G[H_G[t].data[0][1][0]][H_G[t].data[0][1][1]]["delta"]
+                P.add_edge(p_node, child, weight=w)
+                P[p_node][child]["color"] = "red"
 
-    # rootの追加
+    # P(step2)描画
+    p_pos = nx.shell_layout(P)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title(f"P(step2)({dataset_id})")
+    edge_color = [v["color"] for v in P.edges.values()]
+    nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
+    nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
+    plt.savefig(os.path.join(data_dir_name, "out", "P(step2)"+dataset_id))
+    if FIGURE_SHOW:
+        plt.show()
+    
+    # P(step3): Rootの追加
+    P.add_node("Root")
+    child = (src, H_G[src].data[0][1])
+    w = G[H_G[src].data[0][1][0]][H_G[src].data[0][1][1]]["delta"]
+    P.add_edge("Root", child, weight=w)
+    P["Root"][child]["color"] = "green"
+
+    # P(step3)描画
+    p_pos = nx.shell_layout(P)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title(f"P(step3)({dataset_id})")
+    edge_color = [v["color"] for v in P.edges.values()]
+    nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
+    nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
+    plt.savefig(os.path.join(data_dir_name, "out", "P(step3)"+dataset_id))
+    if FIGURE_SHOW:
+        plt.show()
+
+    # P(step3)の冗長部分を削除し，出力
+    tmp = set()
+    for e in nx.bfs_edges(P, source="Root"):
+        tmp.add(e)
+    Q = P.edge_subgraph(tmp)
+    p_pos = nx.shell_layout(P)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title(f"PathGraph({dataset_id})")
+    edge_color = [v["color"] for v in Q.edges.values()]
+    nx.draw_networkx_edges(Q, p_pos, edgelist=Q.edges(), edge_color=edge_color)
+    nx.draw_networkx(Q, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
+    plt.savefig(os.path.join(data_dir_name, "out", "PathGraph"+dataset_id))
+    if FIGURE_SHOW:
+        plt.show()

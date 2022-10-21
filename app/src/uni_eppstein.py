@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import os
 import util, dijkstra, heap
+from copy import deepcopy
 
 dataset_id = "001"
 # dataset_id = "002"
@@ -74,7 +75,6 @@ if __name__ == "__main__":
     # print(util.sidetrack("C", G, T))
     # print(util.sidetrack("D", G, T))
 
-
     # H_OUTの生成
     H_OUT = {}
     for v in G:
@@ -90,4 +90,49 @@ if __name__ == "__main__":
     
     print("---H_OUT---")
     for v, h_out in H_OUT.items():
-        print(h_out.data)
+        print(v, h_out.data)
+
+    # H_Tの生成
+    H_T = {}
+    for v in G.nodes():
+        # print(f"---------{v}----")
+        H_T[v] = heap.Heap()
+    # 経路記憶用
+    paths = {}
+    paths[dst] = [dst]
+    for (t, h) in nx.bfs_edges(T.reverse(), source=dst):
+        # print(h, t)
+        paths[h] = paths[t] + [h]
+    # # 経路出力
+    # for k, p in paths.items():
+    #     print(k, p)
+    for v in G:
+        for u in paths[v]:
+            if len(H_OUT[u].data) > 0:
+                h = H_OUT[u].data[0][1][0]
+                t = H_OUT[u].data[0][1][1]
+                val = H_OUT[u].data[0][0]
+                H_T[v].insert(h, t, val)
+    print("---H_T---")
+    for v, h_t in H_T.items():
+        print(v, h_t.data)
+    
+    for v, h_t in H_T.items():
+        fpath = os.path.join(data_dir_name, "out", "h_t", f"h_t({v}){dataset_id}")
+        h_t.show(fpath)
+    
+    # H_Gの生成（H_OUTとH_Gのマージ）
+    H_G = deepcopy(H_T)
+    for v, p in paths.items():
+        for u in p:
+            for _, (val, (h, t)) in enumerate(H_OUT[u].data):
+                if (val, (h, t)) not in H_G[v].data:
+                    H_G[v].insert(h, t, val)
+    
+    print("---H_G---")
+    for v, h_g in H_G.items():
+        print(v, h_g.data)
+
+    for v, h_g in H_G.items():
+        fpath = os.path.join(data_dir_name, "out", "h_g", f"h_g({v}){dataset_id}")
+        h_g.show(fpath)

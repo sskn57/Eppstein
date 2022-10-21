@@ -34,24 +34,20 @@ class Heap:
         G.attr('node', shape='circle')
         edges = []
         for i, _ in enumerate(self.data):
-            G.node(self.nodename(i))
+            G.node(nodename(self, i))
             if (i-1)//2 >= 0:
-                edges.append((self.nodename((i-1)//2), self.nodename(i)))
+                edges.append((nodename(self, (i-1)//2), nodename(self, i)))
         G.edges(edges)
         G.render(fpath)
         os.remove(fpath)
 
-    # self.dataとindexからヒープノードの名前を算出 #
-    def nodename(self, index):
-        h = self.data[index][1][0]
-        t = self.data[index][1][1]
-        val = self.data[index][0]
-        nodename = f"({h},{t}) {val}"
-        return nodename
 
 
-# if __name__ == "__main__":
-#     print(data)
-#     heapq.heapify(data)
-#     print(data)
-#     show_tree(data, 1, 0)
+# heapとindexからヒープノードの名前を算出 #
+def nodename(heap, index):
+    h = heap.data[index][1][0]
+    t = heap.data[index][1][1]
+    val = heap.data[index][0]
+    nodename = f"({h},{t}) {val}"
+    return nodename
+

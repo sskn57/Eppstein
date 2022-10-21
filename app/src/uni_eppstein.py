@@ -136,3 +136,48 @@ if __name__ == "__main__":
     for v, h_g in H_G.items():
         fpath = os.path.join(data_dir_name, "out", "h_g", f"h_g({v}){dataset_id}")
         h_g.show(fpath)
+
+    # Path Graphの作成
+    P = nx.DiGraph()
+    # H_Gを追加
+    for v, h_g in H_G.items():
+        # print(v)
+        for i, (parent_val, (parent_h, parent_t)) in enumerate(h_g.data):
+            parent_node_name = f"[{v}] ({parent_h},{parent_t})"
+            # print(parent_node_name)
+            P.add_node(parent_node_name)
+            if 2*(i+1)-1 < len(h_g.data):
+                (child_val, (child_h, child_t)) = h_g.data[2*(i+1)-1]
+                child_node_name = f"[{v}] ({child_h},{child_t})"
+                # print(child_node_name)
+                w = G[child_h][child_t]["delta"] - G[parent_h][parent_t]["delta"]
+                # print(w)
+                P.add_edge(parent_node_name, child_node_name, weight=w)
+            if 2*(i+1) < len(h_g.data):
+                (child_val, (child_h, child_t)) = h_g.data[2*(i+1)]
+                child_node_name = f"[{v}] ({child_h},{child_t})"
+                # print(child_node_name)
+                w = G[child_h][child_t]["delta"] - G[parent_h][parent_t]["delta"]
+                # print(w)
+                # P.add_edge()
+                P.add_edge(parent_node_name, child_node_name, weight=w)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title(f"H_GtoP({dataset_id})")
+    edge_labels = {(i, j): w['weight'] for i, j, w in P.edges(data=True)}
+    p_pos = nx.spring_layout(P, k=3)
+    nx.draw_networkx_edge_labels(P, p_pos, edge_labels=edge_labels)
+    nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
+    plt.savefig(os.path.join(data_dir_name, "out", "H_GtoP"+dataset_id))
+    if FIGURE_SHOW:
+        plt.show()
+
+    # # cross辺の追加
+    # for e in P.edges():
+    #     print(e)
+    # for e in T.edges():
+    #     print(e)
+        
+
+    # rootの追加

@@ -1,11 +1,14 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import os
-import util, dijkstra, heap
+import util, dijkstra, heap #自作
+from heapq import heappush, heappop
 from copy import deepcopy
+from collections import deque
 
-dataset_id = "001"
+# dataset_id = "001"
 # dataset_id = "002"
+dataset_id = "003"
 
 ALPHA = 0.7
 NODE_SIZE = 500
@@ -188,6 +191,7 @@ if __name__ == "__main__":
     ax.set_title(f"P(step2)({dataset_id})")
     edge_color = [v["color"] for v in P.edges.values()]
     nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
+    nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
     nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
     plt.savefig(os.path.join(data_dir_name, "out", "P(step2)"+dataset_id))
     if FIGURE_SHOW:
@@ -223,7 +227,171 @@ if __name__ == "__main__":
     ax.set_title(f"PathGraph({dataset_id})")
     edge_color = [v["color"] for v in Q.edges.values()]
     nx.draw_networkx_edges(Q, p_pos, edgelist=Q.edges(), edge_color=edge_color)
+    edge_labels = {(i, j): w['weight'] for i, j, w in Q.edges(data=True)}
+    nx.draw_networkx_edge_labels(Q, p_pos, edge_labels=edge_labels)
     nx.draw_networkx(Q, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
     plt.savefig(os.path.join(data_dir_name, "out", "PathGraph"+dataset_id))
     if FIGURE_SHOW:
         plt.show()
+
+    # ovの計算
+    print("--- OW cal---")
+    popt = nx.shortest_path(T, source=src, target=dst, weight="weight")
+    popt_edges = util.nodetype2edgetype(popt) # pathの表現形式をedgetypeに
+    edges = []
+    OW = {dst: 0.0}
+    for t, h in nx.dfs_edges(T.reverse(), source=dst):
+        print(f"node: {h}")
+        print(f"    edges: {edges[::-1]}")
+        print(f"    edge: {(h, t)}")
+        changed = False
+        for i, (_h, _t) in enumerate(edges):
+            if t == _h:
+                edges = edges[:(i+1)] + [(h, t)]
+                changed = True
+        if not changed:
+            edges = [(h, t)]
+            # edges.append((h, t))
+        print(f"    edges: {edges[::-1]}")
+        OW[h] = 0.0
+        for e in edges[::-1]:
+            if e in popt_edges:
+                print(f"    {e}")
+                OW[h] += G[e[0]][e[1]]["weight"]
+
+    for v, val in sorted(OW.items()):
+        print(v, val)
+
+    minus_weight = -sum(abs(T.edges[edge]["weight"]) for edge in T.edges())
+    A = [] #  パス格納
+    B = [(0, ["Root"])] # 幅優先用キュー
+    OVERLAP = {} #overlap(sidetrack)の計算
+    k_path = []
+    k = 0
+    NUM = 10
+
+    print("---find k-shortest path---")
+    while B and k < NUM:
+        print(f"k:{k}")
+        k_path.append({}) # k番目のsidetrackについて情報を管理する辞書の初期化
+        potentials, stracks = heappop(B)
+        # print("stracks", stracks)
+        print(f"sidetrack: {stracks[-1]} について")
+        k_path[k]["sidetrack"] = stracks[-1]
+        if len(OVERLAP) == 0:
+            OVERLAP["Root"] = OW[src]
+            k_path[k]["overlap"] = OVERLAP["Root"]
+        else:
+            d = OW[stracks[-1][1][1]] - OW[stracks[-1][1][0]]
+            print(f"OVERLAP[{util.get_parent(stracks, popt)}]: {OVERLAP[util.get_parent(stracks, popt)]}")
+            print(f"d = ow({stracks[-1][1][1]}) - ow({stracks[-1][1][0]}) = {OW[stracks[-1][1][1]]} - {OW[stracks[-1][1][0]]} = {d}")
+            # print(f"d: {d}")
+            # C.append(C[-1] + d)
+            # print(f"key {util.get_parent(stracks, popt)} のoverlapを利用したい")
+            OVERLAP[stracks[-1]] = OVERLAP[util.get_parent(stracks, popt)] + d
+            k_path[k]["overlap"] = OVERLAP[stracks[-1]]
+            # print(f"key {stracks[-1]} に 追加")
+            # C.append()
+            # print(util.get_parent(stracks, popt))
+        # print("C", C)
+
+        tmp_T = T.copy()
+        for parent, child in zip(stracks[1:], stracks[2:]):
+            if P[parent][child]["color"] == "red":
+                # *parent[1]は tuple("G", "J")をアンパックして， G Jにしている．下と同じ意味
+                tmp_T.add_edge(*parent[1], weight=minus_weight)
+                # h = parent[1][0]
+                # t = parent[1][1]
+                # tmp_T.add_edge(h, t, weight=minus_weight)
+        if len(stracks) > 1:
+            last_stracks = stracks[-1]
+            tmp_T.add_edge(*last_stracks[1], weight=minus_weight)
+        # nx.shortest_path(tmp_T, source=src, target=dst, weight="weight")
+        A.append(nx.shortest_path(tmp_T, source=src, target=dst, weight="weight"))    
+        # print("Path", A)
+        print("Path", A[-1])
+        k_path[k]["path"] = A[-1]
+        last_stracks = stracks[-1]
+        for v in P[last_stracks]:
+            new_stracks = stracks + [v]
+            new_potentials = potentials + P[last_stracks][v]["weight"]
+            heappush(B, (new_potentials, new_stracks))
+        k += 1
+        print("")
+
+    # 最小のoverlapを求める
+    min_overlap = k_path[0]["overlap"]
+    for info in k_path:
+        if info["overlap"] < min_overlap:
+            min_overlap = info["overlap"]
+
+    # overlapからdetourを計算 #
+    for info in k_path:
+        if info["overlap"] == min_overlap:
+            info["detour"] = True
+        else:
+            info["detour"] = False
+    k_path[0]["detour"] = True # Rootはdetour
+
+    for k, info in enumerate(k_path):
+        print(f"{k+1}-shortest")
+        print(f"    sidetrack: {info['sidetrack']}")
+        print(f"    path: {info['path']}")
+        print(f"    ovarlap: {info['overlap']}")
+    print("")
+
+    # print("---deotur---")
+    # for info in k_path:
+    #     if info["detour"]:
+    #         print(f"    path: {info['path']}")
+
+    print("---deotur---")
+    detour_count = 1
+    for info in k_path:
+        if info["detour"]:
+            print(f"    path: {info['path']}")
+            edge_list = util.nodetype2edgetype(info["path"]) # pathをedgetypeに変換
+            # D = G.edge_subgraph(p) # detourのpathの辺からGのサブグラフを作成
+            # edge_list
+
+            fig = plt.figure()
+            ax = fig.add_subplot()
+            ax.set_title(f"detour[{detour_count}]({dataset_id})")
+            # nx.draw_networkx_nodes(D, pos, node_size=NODE_SIZE, alpha=ALPHA)
+            # edge_labels = {(i, j): w['weight'] for i, j, w in D.edges(data=True)}
+            # nx.draw_networkx_edge_labels(D, pos, edge_labels=edge_labels)
+            # nx.draw_networkx(D, pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
+            # Gの描画
+            edge_labels = {(i, j): w['weight'] for i, j, w in G.edges(data=True)}
+            nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+            nx.draw_networkx_edges(G, pos, alpha=ALPHA, width=1.0)
+            nx.draw_networkx_edges(G, pos, edgelist=edge_list, edge_color="r", alpha=ALPHA*0.5, width=6.0)
+            nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE)
+            nx.draw_networkx(G, pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
+            
+            # edge_labels = {(i, j): w['weight'] for i, j, w in D.edges(data=True)}
+            # nx.draw_networkx_edge_labels(D, pos, edge_labels=edge_labels)
+
+            plt.savefig(os.path.join(data_dir_name, "out", "detour", f"detour[{detour_count}]"+dataset_id))
+            detour_count += 1
+            if FIGURE_SHOW:
+                plt.show()
+
+
+
+
+
+    #     pred, distance = nx.dijkstra_predecessor_and_distance(G.reverse(), source=dst)
+    # T = G.edge_subgraph((i, pred[i][0]) for i in pred if pred[i])
+
+
+    # # shortest path tree 描画 #
+    # fig = plt.figure()
+    # ax = fig.add_subplot()
+    # ax.set_title(f"Shortest Path Graph({dataset_id})")
+    # edge_labels = {(i, j): w['weight'] for i, j, w in T.edges(data=True)}
+    # nx.draw_networkx_edge_labels(T, pos, edge_labels=edge_labels)
+    # nx.draw_networkx(T, pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
+    # plt.savefig(os.path.join(data_dir_name, "out", "ShortestPathTree"+dataset_id))
+    # if FIGURE_SHOW:
+    #     plt.show()

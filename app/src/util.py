@@ -24,5 +24,17 @@ def sidetrack(v, G, T):
             ret.append((v, h))
     return ret
 
-# def outname(v, h, t):
-#     return f"[{v}] ({h},{t})"
+def get_parent(stracks, popt):
+    _, (h, t) = stracks[-1]
+    if h in popt:
+        return "Root"
+    else:
+        return stracks[-2]
+
+# nodetype: ["F", "G", "H", "I"]
+# edgetype: [("F", "G"), ("G", "H"), ("H", "I")]
+def nodetype2edgetype(nodetype_path):
+    return [e for e in zip(nodetype_path[0:], nodetype_path[1:])]
+
+def edgetype2nodetype(edgetype_path):
+    return [h for (h, t) in edgetype_path] + [edgetype_path[-1][1]]

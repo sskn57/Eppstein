@@ -17,7 +17,7 @@ FIGURE_SHOW = False
 if __name__ == "__main__":
     print(f"use dataset{dataset_id}")
     # 読み込むデータの設定 #
-    data_dir_name = os.path.join("data", "dataset"+dataset_id)
+    data_dir_name = os.path.join("uni", "data", "dataset"+dataset_id)
     graph_file_name = "graph" + dataset_id + ".txt"
     pos_file_name = "pos" + dataset_id + ".txt"
     srcdst_file_name = "srcdst" + dataset_id + ".txt"
@@ -25,6 +25,10 @@ if __name__ == "__main__":
     G = nx.read_weighted_edgelist(os.path.join(data_dir_name, graph_file_name), nodetype=str, create_using=nx.DiGraph)
     pos = util.read_pos(os.path.join(data_dir_name, pos_file_name))
     src, dst = util.read_src_dst(os.path.join(data_dir_name, srcdst_file_name))
+
+    # # 出力用ディレクトリ生成
+    # if not os.path.exists(os.path.join(data_dir_name, "out")):
+    #     os.mkdir(os.path.join(data_dir_name, "out"))
     
     # Original Graph 描画
     fig = plt.figure()

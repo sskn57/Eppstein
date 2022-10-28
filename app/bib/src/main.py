@@ -11,7 +11,9 @@ dataset_id = "001"
 # dataset_id = "003"
 threshold = 3.0
 ALPHA = 0.7
-NODE_SIZE = 500
+FIGSIZE = (10, 10)
+FIGSIZE_PathGraph = (30, 30)
+NODE_SIZE = 1000
 FIGURE_SHOW = False
 
 if __name__ == "__main__":
@@ -36,7 +38,7 @@ if __name__ == "__main__":
         os.mkdir(os.path.join(data_dir_name, "out", "fromdst"))
 
     # Original Graph 描画
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Original Graph({dataset_id})")
     edge_labels = {(i, j): w['weight'] for i, j, w in G.edges(data=True)}
@@ -87,7 +89,7 @@ if __name__ == "__main__":
             if u in S or u in U:
                 Gs.add_edge(v, u, weight=G[v][u]["weight_dash"])
     # Gsの出力 #
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Gs({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -101,7 +103,7 @@ if __name__ == "__main__":
 
     Gs_reverse = Gs.reverse()
     # Gs_reverseの出力 #
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Gs_reverse({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -121,7 +123,7 @@ if __name__ == "__main__":
     print("SPT_s", SPT_s.edges())
 
     # Gsにおけるsrcからの最短経路木 出力
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Shortest Path Tree from {src}({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -134,7 +136,7 @@ if __name__ == "__main__":
         plt.show()
 
     # Gs内におけるsidetrack 描画 #
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"SideTrack in Gs_reverse({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -214,7 +216,7 @@ if __name__ == "__main__":
         if v in T and u in T:
             Gt.add_edge(v, u, weight=G[v][u]["weight_dash"])
     # Gtの出力 #
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Gt({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -231,7 +233,7 @@ if __name__ == "__main__":
     SPT_t = Gt.edge_subgraph((i, pred[i][0]) for i in pred if pred[i])
     print("SPT_t", SPT_t.edges())
     # Gtにおけるsrcからの最短経路木 出力
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"Shortest Path Tree from {dst}({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -244,7 +246,7 @@ if __name__ == "__main__":
         plt.show()
 
     # Gt内におけるsidetrack 描画 #
-    fig = plt.figure()
+    fig = plt.figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_title(f"SideTrack in Gt({dataset_id})")
     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE) # for G
@@ -316,167 +318,216 @@ if __name__ == "__main__":
     for v, ht_g in Ht_G.items():
         ht_g.show(os.path.join(data_dir_name, "out", "fromdst", "Ht_G", f"ht_g({v}){dataset_id}"))
 
+    P = nx.DiGraph()
+    Q = {}
+
+    P.add_node("Root")
+    child_node = Hmid.data[0][1]
+    w = Hmid.data[0][0]
+    P.add_edge("Root", child_node, weight=w, type="Root_Hmid")
+
+    for i, (parent_val, parent_name) in enumerate(Hmid.data):
+        P.add_node(parent_name, type="Hmid")
+        # Q[parent_name].add_node(parent_name, type="Hmid")
+        if 2*(i+1)-1 < len(Hmid.data):
+            child_val, child_name = Hmid.data[2*(i+1)-1]
+            # w = child_val - parent_val
+            w = 0.0
+            P.add_edge(parent_name, child_name, weight=w, type="Hmid_Hmid")
+        if 2*(i+1) < len(Hmid.data):
+            child_val, child_name = Hmid.data[2*(i+1)]
+            # w = child_val - parent_val
+            w = 0.0
+            P.add_edge(parent_name, child_name, weight=w, type="Hmid_Hmid")
+
     for v_val, v_name in Hmid.data:
-        print(v_name, v_val)
-        print(f"    Hs_G[{v_name}]: {Hs_G[v_name].data}")
-        print(f"    Ht_G[{v_name}]: {Ht_G[v_name].data}")
-        for (s_val, (s_u, s_v)) in Hs_G[v_name].data:
-            # Hmid内のノードvに関するHs_G(v)内の各ノード(s_u, s_v)について，
-            # Ht_G(s_v)のroot
-            t_val, (t_u, t_v) = Ht_G[s_v].data[0]
-            # print(f"    ({s_u}, {s_v}):({t_u}, {t_v})")
-            if s_v == t_u:
-                print(f"        {s_u}{s_v}-{t_u}{t_v} (red)")
+        Q[v_name] = nx.DiGraph()
+        # print(v_name, v_val)
+        # # HmidのノードをPに追加
+        # P.add_node(v_name, type="Hmid")
+        Q[v_name].add_node(v_name, type="Hmid")
+
+        # Hmid - HsG's rootの辺追加
+        if len(Hs_G[v_name].data) > 0:
+            node = (v_name, Hs_G[v_name].data[0][1])
+            w = Hs_G[v_name].data[0][0]
+            P.add_edge(v_name, node, weight=w, type="Hmid_HsG")
+            Q[v_name].add_edge(v_name, node, weight=w, type="Hmid_HsG")
+
+        # Hmid - HtG's rootの辺追加
+        if len(Ht_G[v_name].data) > 0:
+            node = (v_name, Ht_G[v_name].data[0][1])
+            w = Ht_G[v_name].data[0][0]
+            P.add_edge(v_name, node, weight=w, type="Hmid_HtG")
+            Q[v_name].add_edge(v_name, node, weight=w, type="Hmid_HtG")
+
+        # HsG内の辺を追加
+        for i, (parent_val, (parent_u, parent_v)) in enumerate(Hs_G[v_name].data):
+            parent_node = (v_name, (parent_u, parent_v))
+            P.add_node(parent_node)
+            Q[v_name].add_node(parent_node)
+            if 2*(i+1)-1 < len(Hs_G[v_name].data):
+                (child_val, (child_h, child_t)) = Hs_G[v_name].data[2*(i+1)-1]
+                child_node = (v_name, (child_h, child_t))
+                w = Hs_G[v_name].data[2*(i+1)-1][0] - parent_val # 子 - 親
+                P.add_edge(parent_node, child_node, weight=w, type="HsG_HsG")
+                Q[v_name].add_edge(parent_node, child_node, weight=w, type="HsG_HsG")
+            if 2*(i+1) < len(Hs_G[v_name].data):
+                (child_val, (child_h, child_t)) = Hs_G[v_name].data[2*(i+1)]
+                child_node = (v_name, (child_h, child_t))
+                w = Hs_G[v_name].data[2*(i+1)][0] - parent_val # 子 - 親
+                P.add_edge(parent_node, child_node, weight=w, type="HsG_HsG")
+                Q[v_name].add_edge(parent_node, child_node, weight=w, type="HsG_HsG")
+
+            # HsGのノードparent_node:(parent_u,parent_v)のとき，parent_nodeとHt_G(parent_v)のrootを接続
+            if len(Ht_G[parent_v].data) > 0:
+                child_node = (parent_v, Ht_G[parent_v].data[0][1])
+                w = Ht_G[parent_v].data[0][0]
+                # print(f":AAA: {v_name}: ", parent_node, child_node)
+                P.add_edge(parent_node, child_node, weight=w, type="HsG_HtG")
+                Q[v_name].add_edge(parent_node, child_node, weight=w, type="HsG_HtG")
+                # その後，Ht_G(v)内の辺を接続
+                for i, (child_val, (child_u, child_v)) in enumerate(Ht_G[parent_v].data):
+                    child_node = (parent_v, (child_u, child_v))
+                    P.add_node(child_node)
+                    Q[v_name].add_node(child_node)
+                    if 2*(i+1)-1 < len(Ht_G[parent_v].data):
+                        (grandchild_val, (grandchild_u, grandchild_v)) = Ht_G[parent_v].data[2*(i+1)-1]
+                        grandchild_node = (parent_v, (grandchild_u, grandchild_v))
+                        w = Ht_G[parent_v].data[2*(i+1)-1][0] - child_val # 孫 - 子
+                        P.add_edge(child_node, grandchild_node, weight=w, type="HtG_HtG")
+                        Q[v_name].add_edge(child_node, grandchild_node, weight=w, type="HtG_HtG")
+                    if 2*(i+1) < len(Ht_G[parent_v].data):
+                        (grandchild_val, (grandchild_u, grandchild_v)) = Ht_G[parent_v].data[2*(i+1)]
+                        grandchild_node = (parent_v, (grandchild_u, grandchild_v))
+                        w = Ht_G[parent_v].data[2*(i+1)][0] - child_val # 孫 - 子
+                        P.add_edge(child_node, grandchild_node, weight=w, type="HtG_HtG")
+                        Q[v_name].add_edge(child_node, grandchild_node, weight=w, type="HtG_HtG")
+
+        # HtG内の辺を追加
+        for i, (parent_val, (parent_u, parent_v)) in enumerate(Ht_G[v_name].data):
+            parent_node = (v_name, (parent_u, parent_v))
+            P.add_node(parent_node)
+            Q[v_name].add_node(parent_node)
+            if 2*(i+1)-1 < len(Ht_G[v_name].data):
+                (child_val, (child_u, child_v)) = Ht_G[v_name].data[2*(i+1)-1]
+                child_node = (v_name, (child_u, child_v))
+                w = Ht_G[v_name].data[2*(i+1)-1][0] - parent_val # 子 - 親
+                P.add_edge(parent_node, child_node, weight=w, type="HtG_HtG")
+                Q[v_name].add_edge(parent_node, child_node, weight=w, type="HtG_HtG")
+            if 2*(i+1) < len(Ht_G[v_name].data):
+                (child_val, (child_u, child_v)) = Ht_G[v_name].data[2*(i+1)]
+                child_node = (v_name, (child_u, child_v))
+                w = Ht_G[v_name].data[2*(i+1)][0] - parent_val # 子 - 親
+                P.add_edge(parent_node, child_node, weight=w, type="HtG_HtG")
+                Q[v_name].add_edge(parent_node, child_node, weight=w, type="HtG_HtG")
+
+    for e, val in P.edges().items():
+        # print(f"    e: {e}, val: {val}")
+        if val["type"] == "Hmid_HsG":
+            val["color"] = "blue"
+        elif val["type"] == "Hmid_HtG":
+            val["color"] = "red"
+        elif val["type"] == "HsG_HsG":
+            val["color"] = "blue"
+        elif val["type"] == "HtG_HtG":
+            val["color"] = "red"
+        elif val["type"] == "HsG_HtG":
+            val["color"] = "pink"
+        elif val["type"] == "Hmid_Hmid":
+            val["color"] = "yellow"
+        if val["type"] == "Root_Hmid":
+            val["color"] = "yellow"
+
+    for v_name, q in Q.items():
+        for e, val in q.edges().items():
+            if val["type"] == "Hmid_HsG":
+                val["color"] = "blue"
+            elif val["type"] == "Hmid_HtG":
+                val["color"] = "red"
+            elif val["type"] == "HsG_HsG":
+                val["color"] = "blue"
+            elif val["type"] == "HtG_HtG":
+                val["color"] = "red"
+            elif val["type"] == "HsG_HtG":
+                val["color"] = "pink"
+
+
+    # for v in P.edges().values():
+    #     print(v)
+
+    # p_pos = nx.spring_layout(P)
+    # p_pos = nx.spiral_layout(P)
+    # p_pos = nx.random_layout(P)
+    # p_pos = nx.spectral_layout(P) # 円形
+    # p_pos = nx.planar_layout(P) # 辺が交わらない
+    p_pos = nx.shell_layout(P)
+    fig = plt.figure(figsize=FIGSIZE_PathGraph)
+    ax = fig.add_subplot()
+    ax.set_title(f"Path Graph({dataset_id})")
+    edge_color = [v["color"] for v in P.edges.values()]
+    nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color, alpha=ALPHA)
+    edge_labels = {(i, j): w['weight'] for i, j, w in P.edges(data=True)}
+    nx.draw_networkx_edge_labels(P, p_pos, edge_labels=edge_labels) #エッジのラベルを描画
+    nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
+    plt.savefig(os.path.join(data_dir_name, "out", "Path Graph"+dataset_id))
+    if FIGURE_SHOW:
+        plt.show()
+
+    if not os.path.exists(os.path.join(data_dir_name, "out", "PathGraph_(Hmid)")):
+        os.mkdir(os.path.join(data_dir_name, "out", "PathGraph_(Hmid)"))
+
+    # Path Graphの始点(Hmidのノード)ごとのグラフ
+    for v_name, q in Q.items():
+        pos = nx.planar_layout(q)
+        fig = plt.figure(figsize=FIGSIZE)
+        ax = fig.add_subplot()
+        ax.set_title(f"Path Graph_{v_name}({dataset_id})")
+        edge_color = [v["color"] for v in q.edges.values()]
+        nx.draw_networkx_edges(q, pos, edgelist=q.edges(), edge_color=edge_color, alpha=ALPHA)
+        edge_labels = {(i, j): w['weight'] for i, j, w in q.edges(data=True)}
+        nx.draw_networkx_edge_labels(q, pos, edge_labels=edge_labels) #エッジのラベルを描画
+        nx.draw_networkx(q, pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
+        plt.savefig(os.path.join(data_dir_name, "out", "PathGraph_(Hmid)", f"Path Graph_{v_name}({dataset_id})"))
+        if FIGURE_SHOW:
+            plt.show()
+
+    print("---find k-shortest path---")
+    NUM = 15
+    k = 0
+
+    q = deque()
+    # q.append("Root")
+    # q.append(("Root", P["Root"][Hmid.data[0][1]]["weight"]))
+    q.append(("Root", 0))
+
+    while len(q) > 0:
+        v, potential = q.popleft()
+        # print(f"    {v} -> {P[v]}")
+        for key, val in P[v].items():
+            # print(f"    {u_key} - {u_val}")
+            if val["type"] == "Root_Hmid":
+                srcName = key
+                potential += val["weight"]
+                print(f"    Hmid: {srcName}: {potential}")
+                q.append((key, potential))
+            elif val["type"] == "Hmid_Hmid":
+                srcName = key
+                potential += val["weight"]
+                print(f"    Hmid: {srcName}: {potential}")
+                q.append((key, potential))
             else:
-                print(f"        {s_u}{s_v}-{t_u}{t_v} (blue)")
-
-    # # Hs(Gs_reverse側のパスグラフ)生成 #
-    # Hs = nx.DiGraph()
-    # # Hs(step1): Hs_GからパスグラフであるヒープHsを作成する．
-    # for v, hs_g in Hs_G.items():
-    #     for i, (parent_val, (parent_h, parent_t)) in enumerate(hs_g.data):
-    #         parent_node = (v, (parent_h, parent_t))
-    #         Hs.add_node(parent_node)
-    #         if 2*(i+1)-1 < len(hs_g.data):
-    #             (child_val, (child_h, child_t)) = hs_g.data[2*(i+1)-1]
-    #             child_node = (v, (child_h, child_t))
-    #             w = Gs_reverse[child_h][child_t]["weight"] - Gs_reverse[parent_h][parent_t]["weight"]
-    #             Hs.add_edge(parent_node, child_node, weight=w)
-    #             Hs[parent_node][child_node]["color"] = "black"
-    #         if 2*(i+1) < len(hs_g.data):
-    #             (child_val, (child_h, child_t)) = hs_g.data[2*(i+1)]
-    #             child_node = (v, (child_h, child_t))
-    #             w = Gs_reverse[child_h][child_t]["weight"] - Gs_reverse[parent_h][parent_t]["weight"]
-    #             Hs.add_edge(parent_node, child_node, weight=w)
-    #             Hs[parent_node][child_node]["color"] = "black"
-    # # Hs(step1) 描画
-    # Hs_pos = nx.shell_layout(Hs)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"Hs(step1)({dataset_id})")
-    # edge_color = [v["color"] for v in Hs.edges.values()]
-    # nx.draw_networkx_edges(Hs, Hs_pos, edgelist=Hs.edges(), edge_color=edge_color)
-    # nx.draw_networkx(Hs, Hs_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "fromsrc", "Hs(step1)"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
-
-    # # Hs(step2): Hs(step1)の各ノード(v, (h, t))について，そのノードからHs_G(t)への辺を追加
-    # for hs_node in list(Hs):
-    #     _, strack = hs_node
-    #     if strack not in SPT_s.edges():
-    #         h, t = strack
-    #         if len(Hs_G[t].data) > 0:
-    #             child = (t, Hs_G[t].data[0][1])
-    #             w = Gs_reverse[Hs_G[t].data[0][1][0]][Hs_G[t].data[0][1][1]]["weight"]
-    #             Hs.add_edge(hs_node, child, weight=w)
-    #             Hs[hs_node][child]["color"] = "red"
-
-    # # Hs(step2) 描画
-    # Hs_pos = nx.shell_layout(Hs)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"Hs(step2)({dataset_id})")
-    # edge_color = [v["color"] for v in Hs.edges.values()]
-    # nx.draw_networkx_edges(Hs, Hs_pos, edgelist=Hs.edges(), edge_color=edge_color)
-    # nx.draw_networkx(Hs, Hs_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "fromsrc", "Hs(step2)"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
+                # 辺(u, v)のvがサイドトラック(h, t): (srcName, (h, t))を表している
+                (srcName, (h, t)) = key
+                potential += val["weight"]
+                print(f"    sidetrack: ({h}, {t}): {potential}")
+                q.append((key, potential))
+            
 
 
-    # # Ht(Gt側のパスグラフ)生成 #
-    # Ht = nx.DiGraph()
-    # # Ht(step1): Ht_GからパスグラフであるヒープHtを作成する．
-    # for v, ht_g in Ht_G.items():
-    #     for i, (parent_val, (parent_h, parent_t)) in enumerate(ht_g.data):
-    #         parent_node = (v, (parent_h, parent_t))
-    #         Ht.add_node(parent_node)
-    #         if 2*(i+1)-1 < len(ht_g.data):
-    #             (child_val, (child_h, child_t)) = ht_g.data[2*(i+1)-1]
-    #             child_node = (v, (child_h, child_t))
-    #             w = Gt[child_h][child_t]["weight"] - Gt[parent_h][parent_t]["weight"]
-    #             Ht.add_edge(parent_node, child_node, weight=w)
-    #             Ht[parent_node][child_node]["color"] = "black"
-    #         if 2*(i+1) < len(ht_g.data):
-    #             (child_val, (child_h, child_t)) = ht_g.data[2*(i+1)]
-    #             child_node = (v, (child_h, child_t))
-    #             w = Gt[child_h][child_t]["weight"] - Gt[parent_h][parent_t]["weight"]
-    #             Ht.add_edge(parent_node, child_node, weight=w)
-    #             Ht[parent_node][child_node]["color"] = "black"
-    # # Ht(step1) 描画
-    # Ht_pos = nx.shell_layout(Ht)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"Ht(step1)({dataset_id})")
-    # edge_color = [v["color"] for v in Ht.edges.values()]
-    # nx.draw_networkx_edges(Ht, Ht_pos, edgelist=Ht.edges(), edge_color=edge_color)
-    # nx.draw_networkx(Ht, Ht_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "fromdst", "Ht(step1)"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
-
-    # # Ht(step2): Ht(step1)の各ノード(v, (h, t))について，そのノードからHt_G(t)への辺を追加
-    # for ht_node in list(Ht):
-    #     _, strack = ht_node
-    #     if strack not in SPT_t.edges():
-    #         h, t = strack
-    #         if len(Ht_G[t].data) > 0:
-    #             child = (t, Ht_G[t].data[0][1])
-    #             w = Gt[Ht_G[t].data[0][1][0]][Ht_G[t].data[0][1][1]]["weight"]
-    #             Ht.add_edge(ht_node, child, weight=w)
-    #             Ht[ht_node][child]["color"] = "red"
-
-    # # Ht(step2) 描画
-    # Ht_pos = nx.shell_layout(Ht)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"Ht(step2)({dataset_id})")
-    # edge_color = [v["color"] for v in Ht.edges.values()]
-    # nx.draw_networkx_edges(Ht, Ht_pos, edgelist=Ht.edges(), edge_color=edge_color)
-    # nx.draw_networkx(Ht, Ht_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "fromdst", "Ht(step2)"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
-
-    # # Hs(v)とHt(v)をPに追加
-    # P = deepcopy(Ht)
-
-    # # Hmid内の各ノードvとHs(v)，Ht(v)のroot間の辺を作成
-    # for v_val, v_name in Hmid.data:
-    #     print(v_name, v_val)
-    #     P.add_node(f"Hmid({v_name}, {v_val})")
-    #     val, (h, t) = Ht_G[v_name].data[0]
-    #     w = Gt[h][t]["weight"]
-    #     P.add_edge(f"Hmid({v_name}, {v_val})", (val, (h, t)), weight=w)
-    #     P[f"Hmid({v_name}, {v_val})"][(val, (h, t))]["color"] = "green"
-    
-    # # P 描画
-    # p_pos = nx.shell_layout(P)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"P({dataset_id})")
-    # edge_color = [v["color"] for v in P.edges.values()]
-    # nx.draw_networkx_edges(P, p_pos, edgelist=P.edges(), edge_color=edge_color)
-    # nx.draw_networkx(P, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "P"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
-
-    # tmp = set()
-    # for v_val, v_name in Hmid.data:
-    #     for e in nx.bfs_edges(P, source=f"Hmid({v_name}, {v_val})"):
-    #         tmp.add(e)
-    # Q = P.edge_subgraph(tmp)
-    # p_pos = nx.shell_layout(Q)
-    # fig = plt.figure()
-    # ax = fig.add_subplot()
-    # ax.set_title(f"PathGraph({dataset_id})")
-    # edge_color = [v["color"] for v in Q.edges.values()]
-    # nx.draw_networkx_edges(Q, p_pos, edgelist=Q.edges(), edge_color=edge_color)
-    # edge_labels = {(i, j): w['weight'] for i, j, w in Q.edges(data=True)}
-    # nx.draw_networkx_edge_labels(Q, p_pos, edge_labels=edge_labels)
-    # nx.draw_networkx(Q, p_pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE*0.5)
-    # plt.savefig(os.path.join(data_dir_name, "out", "PathGraph"+dataset_id))
-    # if FIGURE_SHOW:
-    #     plt.show()
+    # while not que.empty():
+    #     v = que.get()
+    #     print(f"{v} -> {P[v].nodes()}")
+    #     # print(v, P[v])
+    #     k += 1
+ 

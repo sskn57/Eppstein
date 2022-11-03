@@ -1,0 +1,3 @@
+src A
+dst P
+threshold 3.0

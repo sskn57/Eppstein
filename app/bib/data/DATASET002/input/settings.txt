@@ -1,0 +1,3 @@
+src H
+dst c
+threshold 8

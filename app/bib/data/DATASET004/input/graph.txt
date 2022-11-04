@@ -1,0 +1,10 @@
+A B 10
+A C 25
+A D 30
+B E 45
+C F 50
+D G 65
+E H 70
+F H 85
+G H 90
+H I 15

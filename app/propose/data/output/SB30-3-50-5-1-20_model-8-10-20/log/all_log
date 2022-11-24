@@ -1,0 +1,61 @@
+------ cal_detour ------
+    --- (1) bib dijkstra method ---
+        length: 29
+        path: [8, 7, 21, 13, 16, 10]
+        S: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+        T: [1, 4, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 26]
+        F: [(11, 10), (14, 10), (16, 10), (17, 10)]
+        U: [10]
+    --- (2) make Hmid ---
+    --- (3) process about Gs ---
+    --- (4) process about Gt---
+    --- (5) make Hs & Ht ---
+    --- (6) make PathGraph ---
+    --- (7) find k-path ---
+        821410: 44
+        8141110: 37
+        8618151110: 48
+        861841110: 46
+    --- (8) make Gd ---
+    --- (9) calculate overlap ---
+        [8, 2, 14, 10]: 0.0
+        [8, 1, 4, 11, 10]: 0.0
+        [8, 6, 18, 15, 11, 10]: 0.0
+        [8, 6, 18, 4, 11, 10]: 0.0
+    --- (10) check cycle ---
+    --- (11) check detour ---
+        [8, 2, 14, 10]: 0.0 (detour)
+        [8, 1, 4, 11, 10]: 0.0 (detour)
+        [8, 6, 18, 15, 11, 10]: 0.0 (detour)
+        [8, 6, 18, 4, 11, 10]: 0.0 (detour)
+    --- (12) output ---
+        [8, 7, 21, 13, 16, 10]: 29
+        [8, 1, 4, 11, 10]: 37
+        [8, 2, 14, 10]: 44
+        [8, 6, 18, 4, 11, 10]: 46
+        [8, 6, 18, 15, 11, 10]: 48
+------ end cal_detour ------
+
+------ cal_centrality ------
+    [8, 7, 21, 13, 16, 10]: (len: 29, RPscore: 0.18478641964203377)
+    [8, 1, 4, 11, 10]: (len: 37, RPscore: 0.22511331152423814)
+    [8, 2, 14, 10]: (len: 44, RPscore: 0.2975241765006136)
+    [8, 6, 18, 4, 11, 10]: (len: 46, RPscore: 0.18215054620953183)
+    [8, 6, 18, 15, 11, 10]: (len: 48, RPscore: 0.1752433817802064)
+
+    8 {'type': 'src'}
+    7 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.036957283928406755, 'C': [0.10574198745650676]}
+    21 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.036957283928406755, 'C': [0.10574198745650676]}
+    13 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.036957283928406755, 'C': [0.10574198745650676]}
+    16 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.036957283928406755, 'C': [0.10574198745650676]}
+    10 {'type': 'dst'}
+    1 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.04502266230484763, 'C': [0.12881860587808022]}
+    4 {'type': 'between', 'Cbet': 0.4, 'critical_node': False, 'C_without_normalize': 0.162905543093508, 'C': [0.46610448775832863]}
+    11 {'type': 'between', 'Cbet': 0.6, 'critical_node': False, 'C_without_normalize': 0.3495043437083858, 'C': [1.0]}
+    2 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.05950483530012272, 'C': [0.1702549234975216]}
+    14 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.05950483530012272, 'C': [0.1702549234975216]}
+    6 {'type': 'between', 'Cbet': 0.4, 'critical_node': False, 'C_without_normalize': 0.1429575711958953, 'C': [0.40902945491050635]}
+    18 {'type': 'between', 'Cbet': 0.4, 'critical_node': False, 'C_without_normalize': 0.1429575711958953, 'C': [0.40902945491050635]}
+    15 {'type': 'between', 'Cbet': 0.2, 'critical_node': False, 'C_without_normalize': 0.03504867635604128, 'C': [0.10028108945416905]}
+------ end cal_centrality ------
+

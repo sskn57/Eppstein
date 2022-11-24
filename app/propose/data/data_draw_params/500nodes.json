@@ -1,0 +1,95 @@
+{
+    "path": "propose/data/data_draw_params/500nodes.json",
+    "extensions": ["svg", "png", "pdf"],
+    "gen_model": {
+        "figsize": [
+            14,
+            8
+        ],
+        "edge": {
+            "digit": 3,
+            "color": "gray",
+            "width": 2,
+            "alpha": 0.4,
+            "font": {
+                "color": "black",
+                "size": 4,
+                "alpha": 0.9
+            }
+        },
+        "node": {
+            "color": {
+                "src": "red",
+                "dst": "blue",
+                "default": "black"
+            },
+            "size": 150,
+            "alpha": 0.9,
+            "font": {
+                "color": "white",
+                "size": 6,
+                "alpha": 0.9
+            }
+        }
+        
+    },
+    "cal_detour": {
+        "detour_graph": {
+            "figsize": [
+                14,
+                8
+            ],
+            "G": {
+                "edge": {
+                    "digit": 3,
+                    "color": "gray",
+                    "width": 2,
+                    "alpha": 0.4,
+                    "font": {
+                        "color": "black",
+                        "size": 4,
+                        "alpha": 0.9
+                    }
+                },
+                "node": {
+                    "color": {
+                        "src": "red",
+                        "dst": "blue",
+                        "default": "black"
+                    },
+                    "size": 150,
+                    "alpha": 0.9,
+                    "font": {
+                        "color": "white",
+                        "size": 6,
+                        "alpha": 0.9
+                    }
+                }
+            },
+            "detour": {
+                "edge": {
+                    "color": "red",
+                    "arrowsize": 15,
+                    "width": 5,
+                    "alpha": 0.5
+                }
+            }
+        }
+    },
+    "cal_centrality": {
+        "centrality_graph": {
+            "figsize": [
+                20,
+                8
+            ],
+            "title": "Centrality",
+            "xlabel": "node",
+            "ylabel": "centrality",
+            "color": {
+                "color1": "red",
+                "color2": "blue"
+            },
+            "width": 0.8
+        }
+    }
+}

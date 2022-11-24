@@ -5,7 +5,7 @@ import networkx as nx
 info = {}
 all_format = "png"
 # dataset
-dataset_name = "DATASET005"
+dataset_name = "DATASET002"
 info["dataset_name"] = dataset_name
 data_dir_path = os.path.join("bib", "data")
 dataset_dir_path = os.path.join(data_dir_path, dataset_name)
@@ -16,10 +16,19 @@ input_dir_path = os.path.join(dataset_dir_path, input_dir_name)
 output_dir_name = "output"
 output_dir_path = os.path.join(dataset_dir_path, output_dir_name)
 info["output_dir_path"] = output_dir_path
-fromsrc_dir = "fromsrc"
-info["fromsrc_dir_path"] = os.path.join(output_dir_path, fromsrc_dir)
-fromdst_dir = "fromdst"
-info["fromdst_dir_path"] = os.path.join(output_dir_path, fromdst_dir)
+
+# fromsrc
+info["fromsrc"] = {}
+fromsrc_dir_name = "fromsrc"
+info["fromsrc"]["verbose"] = True
+info["fromsrc"]["dir_path"] = os.path.join(output_dir_path, fromsrc_dir_name)
+# info["fromsrc_dir_path"] = os.path.join(output_dir_path, fromsrc_dir)
+
+# fromdst
+info["fromdst"] = {}
+fromdst_dir_name = "fromdst"
+info["fromdst"]["verbose"] = True
+info["fromdst"]["dir_path"] = os.path.join(output_dir_path, fromdst_dir_name)
 # settings
 settings_data_name = "settings.txt"
 settings_data_path = os.path.join(input_dir_path, settings_data_name)
@@ -42,7 +51,7 @@ info["overlap_verbose"] = False
 info["k-path_verbose"] = False
 # rate
 info["rate"] = {}
-info["rate"]["distribution"] = None
+info["rate"]["distribution"] = "case1"
 info["rate"]["digit"] = 3
 info["rate"]["seed"] = 400
 
@@ -50,17 +59,18 @@ info["rate"]["seed"] = 400
 graph_G_name = "graph.txt"
 graph_G_path = os.path.join(input_dir_path, graph_G_name)
 info["G"] = {}
-info["G"]["flag"] = True
+info["G"]["verbose"] = True
 info["G"]["data"] = nx.read_weighted_edgelist(graph_G_path, nodetype=str)
 info["G"]["pos"] = info["default_pos"]
 info["G"]["title"] = f"Original Graph[{dataset_name}]"
 info["G"]["alpha"] = 0.7
 info["G"]["nodesize"] = 800
-info["G"]["figsize"] = (20, 20)
-info["G"]["format"] = all_format if all_format != None else "png"
+info["G"]["figsize"] = (8, 8)
+# info["G"]["format"] = all_format if all_format != None else "png"
+info["G"]["format"] = ["png", "svg", "pdf"]
 # Hmid
 info["Hmid"] = {}
-info["Hmid"]["flag"] = True
+info["Hmid"]["verbose"] = False
 Hmid_graph_data_name = "Hmid"
 info["Hmid"]["data_path"] = os.path.join(output_dir_path, Hmid_graph_data_name)
 info["Hmid"]["format"] = all_format if all_format != None else "png"
@@ -70,7 +80,7 @@ info["Gs"]["flag"] = True
 info["Gs"]["title"] = f"Gs[{dataset_name}]"
 info["Gs"]["alpha"] = 0.7
 info["Gs"]["nodesize"] = 800
-info["Gs"]["figsize"] = (6, 6)
+info["Gs"]["figsize"] = (4, 4)
 info["Gs"]["format"] = all_format if all_format != None else "png"
 # Gt
 info["Gt"] = {}
@@ -123,32 +133,32 @@ info["H"] = {
 # Hs (step1)
 info["H"]["s"]["step1"]["flag"] = True
 Hs_step1_dir_name = f"Hs(step1)[{dataset_name}]"
-info["H"]["s"]["step1"]["dir_path"] = os.path.join(info["fromsrc_dir_path"], Hs_step1_dir_name)
+info["H"]["s"]["step1"]["dir_path"] = os.path.join(info["fromsrc"]["dir_path"], Hs_step1_dir_name)
 info["H"]["s"]["step1"]["format"] = all_format if all_format != None else "png"
 # Hs (step2)
 info["H"]["s"]["step2"]["flag"] = True
 Hs_step2_dir_name = f"Hs(step2) [{dataset_name}]"
-info["H"]["s"]["step2"]["dir_path"] = os.path.join(info["fromsrc_dir_path"], Hs_step2_dir_name)
+info["H"]["s"]["step2"]["dir_path"] = os.path.join(info["fromsrc"]["dir_path"], Hs_step2_dir_name)
 info["H"]["s"]["step2"]["format"] = all_format if all_format != None else "png"
 # Hs (step3)
 info["H"]["s"]["step3"]["flag"] = True
 Hs_step3_dir_name = f"Hs(step3) [{dataset_name}]"
-info["H"]["s"]["step3"]["dir_path"] = os.path.join(info["fromsrc_dir_path"], Hs_step3_dir_name)
+info["H"]["s"]["step3"]["dir_path"] = os.path.join(info["fromsrc"]["dir_path"], Hs_step3_dir_name)
 info["H"]["s"]["step3"]["format"] = all_format if all_format != None else "png"
 # Ht (step1)
 info["H"]["t"]["step1"]["flag"] = True
 Hs_step1_dir_name = f"Ht(step1)[{dataset_name}]"
-info["H"]["t"]["step1"]["dir_path"] = os.path.join(info["fromdst_dir_path"], Hs_step1_dir_name)
+info["H"]["t"]["step1"]["dir_path"] = os.path.join(info["fromdst"]["dir_path"], Hs_step1_dir_name)
 info["H"]["t"]["step1"]["format"] = all_format if all_format != None else "png"
 # Ht (step2)
 info["H"]["t"]["step2"]["flag"] = True
 Hs_step2_dir_name = f"Ht(step2) [{dataset_name}]"
-info["H"]["t"]["step2"]["dir_path"] = os.path.join(info["fromdst_dir_path"], Hs_step2_dir_name)
+info["H"]["t"]["step2"]["dir_path"] = os.path.join(info["fromdst"]["dir_path"], Hs_step2_dir_name)
 info["H"]["t"]["step2"]["format"] = all_format if all_format != None else "png"
 # Ht (step3)
 info["H"]["t"]["step3"]["flag"] = True
 Hs_step3_dir_name = f"Ht(step3) [{dataset_name}]"
-info["H"]["t"]["step3"]["dir_path"] = os.path.join(info["fromdst_dir_path"], Hs_step3_dir_name)
+info["H"]["t"]["step3"]["dir_path"] = os.path.join(info["fromdst"]["dir_path"], Hs_step3_dir_name)
 info["H"]["t"]["step3"]["format"] = all_format if all_format != None else "png"
 
 # パスグラフ
@@ -210,4 +220,11 @@ info["detour"]["alpha"] = 0.4
 info["detour"]["edge_color"] = "red"
 info["detour"]["edge_width"] = 12
 info["detour"]["arrowsize"] = 15
-info["detour"]["format"] = all_format if all_format != None else "png"
+info["detour"]["format"] = ["png", "svg", "pdf"]
+
+# cent
+info["cent"] = {}
+info["cent"]["dir_name"] = "detour"
+info["cent"]["dir_path"] = os.path.join(output_dir_path, info["cent"]["dir_name"])
+info["cent"]["format"] = ["png", "svg", "pdf"]
+info["cent"]["bias"] = 3.0

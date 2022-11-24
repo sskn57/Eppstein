@@ -34,6 +34,12 @@ def isfloat(s):
     else:
         return True
 
+# class Drawer:
+#     def __init__(self, settings):
+#         self.settings = settings
+
+#     def 
+
 class DrawGraph:
     def __init__(self, graph, settings):
         self.graph = graph
@@ -65,16 +71,17 @@ class DrawOriginalGraph(DrawGraph):
         self.set_pos(self.info["pos"])
 
     def draw(self, weight_label):
-        if self.info["flag"]:
+        if self.info["verbose"]:
             # 辺の重み
             edge_labels = {(i, j): w[weight_label] for i, j, w in self.graph.edges(data=True)}
             nx.draw_networkx_edge_labels(self.graph, self.pos, edge_labels=edge_labels)
             # 辺と頂点
             nx.draw_networkx(self.graph, self.pos, with_labels=True, alpha=self.info["alpha"], node_size=self.info["nodesize"])
             # 保存
-            fname = self.info["title"] + f"({weight_label})" + "." + self.info["format"]
-            output_path = os.path.join(self.settings.info["output_dir_path"], fname)
-            plt.savefig(output_path)
+            for f in self.info["format"]:
+                fname = self.info["title"] + f"({weight_label})" + "." + f
+                output_path = os.path.join(self.settings.info["output_dir_path"], fname)
+                plt.savefig(output_path)
 
 class DrawGs(DrawGraph):
     def __init__(self, graph, settings, pos):
@@ -107,10 +114,8 @@ class DrawGs(DrawGraph):
             nx.draw_networkx(self.graph, self.pos, with_labels=True, alpha=self.info["alpha"], node_size=self.info["nodesize"])
             # 保存
             fname = self.info["title"] + "." + self.info["format"]
-            output_path = os.path.join(self.settings.info["fromsrc_dir_path"], fname)
+            output_path = os.path.join(self.settings.info["fromsrc"]["dir_path"], fname)
             plt.savefig(output_path)
-
-
 
 class DrawGt(DrawGraph):
     def __init__(self, graph, settings, pos):
@@ -143,10 +148,8 @@ class DrawGt(DrawGraph):
             nx.draw_networkx(self.graph, self.pos, with_labels=True, alpha=self.info["alpha"], node_size=self.info["nodesize"])
             # 保存
             fname = self.info["title"] + "." + self.info["format"]
-            output_path = os.path.join(self.settings.info["fromdst_dir_path"], fname)
+            output_path = os.path.join(self.settings.info["fromdst"]["dir_path"], fname)
             plt.savefig(output_path)
-
-
 
 class DrawSPT_s(DrawGraph):
     def __init__(self, graph, settings, pos):
@@ -212,8 +215,10 @@ class DrawSPT_s(DrawGraph):
             nx.draw_networkx_edge_labels(G, self.pos, edge_labels=edge_labels)
             nx.draw_networkx(self.graph, self.pos, with_labels=True, alpha=self.info["alpha"], node_size=self.info["nodesize"])
             # 保存
+            # for f in self.info["format"]:
             fname = self.info["title"] + "." + self.info["format"]
-            output_path = os.path.join(self.settings.info["fromsrc_dir_path"], fname)
+                # fname = self.info["title"] + "." + f
+            output_path = os.path.join(self.settings.info["fromsrc"]["dir_path"], fname)
             plt.savefig(output_path)
 
 class DrawSPT_t(DrawGraph):
@@ -281,9 +286,8 @@ class DrawSPT_t(DrawGraph):
             nx.draw_networkx(self.graph, self.pos, with_labels=True, alpha=self.info["alpha"], node_size=self.info["nodesize"])
             # 保存
             fname = self.info["title"] + "." + self.info["format"]
-            output_path = os.path.join(self.settings.info["fromdst_dir_path"], fname)
+            output_path = os.path.join(self.settings.info["fromdst"]["dir_path"], fname)
             plt.savefig(output_path)
-
 
 class DrawP(DrawGraph):
     def __init__(self, graph, settings):

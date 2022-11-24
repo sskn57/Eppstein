@@ -1,0 +1,11 @@
+{
+    "seed": 100,
+    "length_params": {
+        "m": 1,
+        "M": 20
+    },
+    "rate_params": {
+        "ave": 0.9,
+        "scale": 0.05
+    }
+}

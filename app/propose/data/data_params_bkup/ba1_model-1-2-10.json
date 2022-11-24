@@ -1,0 +1,18 @@
+{
+    "input": {
+        "src": 1,
+        "dst": 2,
+        "threshold": 10,
+        "model_name": "ba20-3-1-20_model",
+        "params_name": "ba20-3-1-20_model-1-2-10",
+        "output_name": "ba20-3-1-20_model-1-2-10"
+    },
+    "path": {
+        "params": "propose/data/input/data_params/ba1_model-1-2-10.json",
+        "draw_params": "",
+        "model_params": "",
+        "model": "propose/data/input/data_model/ba20-3-1-20_model",
+        "output": "propose/data/output/ba20-3-1-20_model-1-2-10"
+    }
+
+}

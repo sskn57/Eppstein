@@ -1,0 +1,43 @@
+------ cal_detour ------
+    --- (1) bib dijkstra method ---
+        length: 40
+        path: [46, 48, 49, 50, 52, 62, 61, 60]
+        S: [2, 15, 35, 41, 44, 45, 46, 47, 48, 49, 50, 51, 52, 56, 62, 72, 74, 75, 90, 91, 96, 97]
+        T: [1, 2, 4, 6, 14, 16, 17, 27, 28, 30, 31, 33, 51, 52, 54, 55, 57, 58, 59, 60, 61, 62, 64, 65, 70, 76, 77, 78, 82, 99]
+        F: [(2, 1), (15, 17), (44, 14), (62, 61), (74, 76), (96, 55)]
+        U: [1, 14, 17, 55, 61, 76]
+    --- (2) make Hmid ---
+    --- (3) process about Gs ---
+    --- (4) process about Gt---
+    --- (5) make Hs & Ht ---
+    --- (6) make PathGraph ---
+    --- (7) find k-path ---
+        464850215960: 43
+    --- (8) make Gd ---
+    --- (9) calculate overlap ---
+        [46, 48, 50, 2, 1, 59, 60]: 6.0
+    --- (10) check cycle ---
+    --- (11) check detour ---
+        [46, 48, 50, 2, 1, 59, 60]: 6.0 (detour)
+    --- (12) output ---
+        [46, 48, 49, 50, 52, 62, 61, 60]: 40
+        [46, 48, 50, 2, 1, 59, 60]: 43
+------ end cal_detour ------
+
+------ cal_centrality ------
+    [46, 48, 49, 50, 52, 62, 61, 60]: (len: 40, RPscore: 0.1282507350863017)
+    [46, 48, 50, 2, 1, 59, 60]: (len: 43, RPscore: 0.1534269615630961)
+
+    46 {'type': 'src'}
+    48 {'type': 'between', 'Cbet': 1.0, 'critical_node': True, 'C_without_normalize': 0.2816776966493978, 'C': [1.0, None]}
+    49 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.06412536754315085, 'C': [0.22765511187407653, 0.8359074166606577]}
+    50 {'type': 'between', 'Cbet': 1.0, 'critical_node': True, 'C_without_normalize': 0.2816776966493978, 'C': [1.0, None]}
+    52 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.06412536754315085, 'C': [0.22765511187407653, 0.8359074166606577]}
+    62 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.06412536754315085, 'C': [0.22765511187407653, 0.8359074166606577]}
+    61 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.06412536754315085, 'C': [0.22765511187407653, 0.8359074166606577]}
+    60 {'type': 'dst'}
+    2 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.07671348078154805, 'C': [0.27234488812592345, 1.0]}
+    1 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.07671348078154805, 'C': [0.27234488812592345, 1.0]}
+    59 {'type': 'between', 'Cbet': 0.5, 'critical_node': False, 'C_without_normalize': 0.07671348078154805, 'C': [0.27234488812592345, 1.0]}
+------ end cal_centrality ------
+

@@ -1,0 +1,8 @@
+n:30
+seed:10
+length
+  m:5
+  M:30
+rate
+  ave:0.9
+  scale:0.05

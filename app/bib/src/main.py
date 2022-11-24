@@ -46,7 +46,6 @@ if __name__ == "__main__":
         hs = G[tail][head]['weight'] + distance[head] - distance[tail]
         ht = G[tail][head]['weight'] + distance[tail] - distance[head]
         G[tail][head]['weight_dash'] = (hs + ht) / 2
-        # print(f"({tail}, {head}): {G[tail][head]['weight_dash']}")
     
     # 双方向ダイクストラ法
     length_shortest, path_shortest, (S, T), F, U, (ps, pt) = dijkstra.bib_method(G, src, dst, threshold=threshold, weight_label="weight_dash", verbose=settings.info["bib_method_verbose"])
@@ -59,10 +58,7 @@ if __name__ == "__main__":
     print(f"U: {U}") # 追加する点集合
 
     if len(U) == 0:
-        # 単方向のdetourプログラムを実行?
-        # DATASET4の結果をもとに考える
-        # SがVと一致したとき，U=0になる！！！
-        # Vを用いて，探索する = 単方向のdetourプログラムと同じになる．
+        # Uが空の場合は終了
         exit()
         # pass
 
@@ -72,13 +68,16 @@ if __name__ == "__main__":
         qu = ps[u] + pt[u]
         Hmid.insert(u, qu)
     # Hmid出力 #
-    if settings.info["Hmid"]["flag"]:
+    if settings.info["Hmid"]["verbose"]:
         Hmid.show(settings.info["Hmid"]["data_path"], format=settings.info["Hmid"]["format"])
+    
+    if settings.info["fromsrc"]["verbose"]:
+        if not os.path.exists(settings.info["fromsrc"]["dir_path"]):
+           os.mkdir(settings.info["fromsrc"]["dir_path"])
 
-    if not os.path.exists(settings.info["fromsrc_dir_path"]):
-       os.mkdir(settings.info["fromsrc_dir_path"])
-    if not os.path.exists(settings.info["fromdst_dir_path"]):
-       os.mkdir(settings.info["fromdst_dir_path"])
+    if settings.info["fromdst"]["verbose"]:
+        if not os.path.exists(settings.info["fromdst"]["dir_path"]):
+            os.mkdir(settings.info["fromdst"]["dir_path"])
 
     # Gsの作成 #
     Gs = nx.DiGraph()
@@ -317,38 +316,6 @@ if __name__ == "__main__":
     for p, info in k_path.items():
         print(f"    {p}")
 
-    # k_pathの描画
-    # for info in sorted(k_path.values(), key=lambda v:v["length"]):
-    #     if not settings.info["cycle"]:
-    #         if util.cycle(info["path"]):
-    #             continue
-    #     path_str = util.nodetype2strtype(info["path"])
-    #     print(f"    len: {info['length']}, path: {path_str}")
-
-
-    # for info in sorted(k_path.values(), key=lambda v:v["length"]):
-    #     # if k > NUM:
-    #     #     break
-    #     if info["length"] > length_shortest + threshold:
-    #         break
-    #     if CYCLE_FLAG:
-    #         if util.cycle(info["path"]):
-    #             continue
-    #     print(f"    {info['length']} | {info['path']}")
-    #     fig = plt.figure()
-    #     ax = fig.add_subplot()
-    #     path_str = util.nodetype2strtype(info["path"])
-    #     ax.set_title(f"{path_str}(len:{info['length']})({dataset_id})")
-    #     edge_list = util.nodetype2edgetype(info["path"]) # pathをedgetypeに変換
-    #     edge_labels = {(i, j): w['weight'] for i, j, w in G.edges(data=True)}
-    #     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
-    #     nx.draw_networkx_edges(G, pos, alpha=ALPHA, width=1.0)
-    #     nx.draw_networkx_edges(G, pos, edgelist=edge_list, edge_color="r", alpha=ALPHA*0.5, width=6.0)
-    #     nx.draw_networkx_nodes(G, pos, alpha=ALPHA, node_size=NODE_SIZE)
-    #     nx.draw_networkx(G, pos, with_labels=True, alpha=ALPHA, node_size=NODE_SIZE)
-    #     plt.savefig(os.path.join(data_dir_name, "out", "k_path", f"path[{k}]"+dataset_id))
-    #     k += 1
-
     # Gd = Gs + Gtの作成
     Gd = nx.compose(Gs, Gt)
     d = util.DrawGs(graph=Gd, settings=settings, pos=pos)
@@ -451,10 +418,10 @@ if __name__ == "__main__":
         fname = f"detour[{k}]" + ".png" 
         output_path = os.path.join(settings.info["detour"]["dir_path"], fname)
         plt.savefig(output_path)
-        fname = f"detour[{k}]" + ".pdf"
-        output_path = os.path.join(settings.info["detour"]["dir_path"], fname)
-        plt.savefig(output_path)
-
+        for f in settings.info["detour"]["format"]:
+            fname = f"detour[{k}]" + "." + f
+            output_path = os.path.join(settings.info["detour"]["dir_path"], fname)
+            plt.savefig(output_path)
 
     # 中心性の計算
     nodes = {}
@@ -473,6 +440,7 @@ if __name__ == "__main__":
             print(f" Cbet({v}): {info['Cbet']}")
     # 中心性C(v)計算
     exist_critical_node = centrality.centrality(nodes, detour, settings)
+    # exist_critical_node = centrality.centrality_v2(nodes, detour, settings, path_shortest)
 
     print("--- Centrality (正規化前) ---")
     for v, info in nodes.items():
@@ -520,8 +488,6 @@ if __name__ == "__main__":
                 else:
                     y2_for_graph.append(info["C"]["type2"])
 
-    print(x_for_graph)
-    print(y1_for_graph)
     fig = plt.figure(figsize=(8, 5))
     plt.title("Centrality")
     plt.xlabel("node")
@@ -532,5 +498,6 @@ if __name__ == "__main__":
     if exist_critical_node:
         plt.bar(left+width, y2_for_graph, linewidth=0, align="center", color="blue", width=width)
     plt.xticks(left + width/2, x_for_graph)
-    plt.savefig(f"bib/data/{settings.info['dataset_name']}/output/detour/cent.pdf")
-    plt.savefig(f"bib/data/{settings.info['dataset_name']}/output/detour/cent.png")
+    for f in settings.info["cent"]["format"]:
+        fname = settings.info["cent"]["dir_path"] + "cent" + "." + f
+        plt.savefig(fname)
